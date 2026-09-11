@@ -89,6 +89,20 @@ def esc(s):
     return html.escape(s, quote=False)
 
 
+# 每卷开头的问候语和结尾的道别是口播的套话，对搜索结果和社交预览毫无信息量。
+# 挑第一段真正讲内容的段落做 description。
+BOILERPLATE = re.compile(
+    r"(大家好|欢迎回到|欢迎来到|我是付启航|我们明天见|今天就到这里|下一卷见)"
+)
+
+
+def pick_desc(paras):
+    for p in paras:
+        if len(p) >= 24 and not BOILERPLATE.search(p):
+            return p
+    return paras[0]
+
+
 def page(title, body, desc, canonical):
     return f"""<!doctype html>
 <html lang="zh-Hans">
@@ -185,7 +199,7 @@ def build():
         body += pager
         body.append(FOOTER_VOL)
 
-        desc = (paras[0][:110] + "…") if paras else title
+        desc = (pick_desc(paras)[:110] + "…") if paras else title
         out = page(
             title, "\n".join(body), desc, "%s/v/%03d.html" % (BASE, n)
         )
@@ -218,8 +232,9 @@ def build():
 <p class="lede">这里是一次很笨的尝试——<strong>一卷一卷，用今天的话把它讲一遍。</strong>
 每一卷可以独立读，也可以顺着读。</p>
 
-<p><a class="start" href="v/050.html">从第 50 卷开始读 →</a></p>
-<p class="note">（前面几十卷是铺垫，第 50 卷进入正题。想从头也可以直接点下面的卷号。）</p>
+<p><a class="start" href="v/001.html">从第 1 卷开始读 →</a></p>
+<p class="note">（第 1 卷是缘起，讲开讲之前发生的事。如果想直接进正题，可以
+<a href="v/050.html">从第 50 卷起读</a>。）</p>
 
 <h2>是什么，不是什么</h2>
 <p class="note"><strong>是</strong>：逐卷的白话解读稿。保留原经的义理骨架和推进顺序，用现代口语讲出来。<br>
