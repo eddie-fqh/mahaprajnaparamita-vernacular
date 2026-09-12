@@ -29,6 +29,11 @@ DANA = "https://openclaw-live-demo.netlify.app/dana.html"
 REPO = "https://github.com/eddie-fqh/mahaprajnaparamita-vernacular"
 LINKEDIN = "https://www.linkedin.com/in/eddie-fu-qihang"
 LICENSE = "https://creativecommons.org/licenses/by-nc-sa/4.0/"
+
+# IndexNow：让 Bing / Yandex 等直接收录，不用等它们自己爬过来。
+# docs/ 每次构建都会被 rmtree 重建，所以 key 文件必须在这里生成，
+# 否则下次 build 之后校验就失效了。
+INDEXNOW_KEY = "dd2d5cf90de74098be6c7833ffbb9e31d19f559274f64068b813a4286115becb"
 BASE = "https://eddie-fqh.github.io/mahaprajnaparamita-vernacular"
 
 CSS = """
@@ -284,6 +289,10 @@ def build():
 
     with open(os.path.join(OUT, "robots.txt"), "w", encoding="utf-8") as f:
         f.write("User-agent: *\nAllow: /\nSitemap: %s/sitemap.xml\n" % BASE)
+
+    # ---- IndexNow 校验文件（内容必须就是 key 本身）----
+    with open(os.path.join(OUT, "%s.txt" % INDEXNOW_KEY), "w", encoding="utf-8") as f:
+        f.write(INDEXNOW_KEY + "\n")
 
     print("built %d volume pages -> docs/  (missing %d)" % (len(nums), len(missing)))
 
