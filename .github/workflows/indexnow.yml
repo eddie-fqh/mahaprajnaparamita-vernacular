@@ -1,0 +1,30 @@
+name: IndexNow
+
+# 为什么存在：这个站没有外链，搜索引擎不会自己爬过来。
+# 以前 indexnow_ping.py 要靠人记得跑一次 —— 结果 9/11 建好了脚本，
+# 提交这一步隔了一天都没发生。这个 workflow 把「记得跑」这件事去掉了。
+#
+# 触发：docs/ 有变化就自动提交；也可以在 Actions 页面手动点。
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - 'docs/sitemap.xml'
+      - 'docs/v/**'
+      - 'docs/index.html'
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Wait for GitHub Pages to serve the new build
+        # IndexNow 会去抓 keyLocation 验证。Pages 部署有延迟，
+        # 抓太早会拿到 403 SiteVerificationNotCompleted。
+        run: sleep 90
+
+      - name: Submit sitemap URLs to IndexNow
+        run: python3 tools/indexnow_ping.py
